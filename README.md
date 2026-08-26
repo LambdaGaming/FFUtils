@@ -1,2 +1,2 @@
-# FFChooser
- Plugin has a 10% chance of activating Freak Fortress during normal map rotation. Once Freak Fortress is activated, the plugin will continue to run the gamemode until the map is manually changed to one that doesn't start with arena_ or vsh_.
+# FFUtils
+ This is a TF2 SourceMod plugin that helps manage Freak Fortress rounds. The gamemode can be toggled on/off using the `ff_toggle` server command. It also handles map rotation to ensure that the server doesn't switch to non-arena maps while Freak Fortress is active. There is also a 10% chance that Freak Fortress will activate at the end of a regular match.

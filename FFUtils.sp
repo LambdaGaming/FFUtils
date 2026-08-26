@@ -4,23 +4,47 @@
 #include <tf2>
 #include <tf2_stocks>
 
-public Plugin myinfo = 
-{
-	name = "ModeChooser",
-	author = "LambdaGaming",
-	description = "10% chance of Freak Fortress activating during normal map rotation.",
-	version = "1.3",
-	url = ""
+public Plugin myinfo = {
+	name = "FFUtils",
+	author = "OPGman",
+	description = "Utility for managing Freak Fortress rounds.",
+	version = "2.0",
+	url = "https://github.com/LambdaGaming/FFUtils"
 };
+
+static bool ModeOverride = false;
 
 public void OnPluginStart()
 {
-	PrintToServer( "[ModeChooser] Successfully loaded." );
+	RegServerCmd( "ff_toggle", FFToggle );
+	PrintToServer( "[FFUtils] Successfully loaded." );
+}
+
+public Action:FFToggle( int args )
+{
+	if ( IsFreakMap() )
+	{
+		SetRandomMap();
+		ModeOverride = true;
+		PrintToChatAll( "Freak Fortress has been disabled. Normal gameplay will resume on the next map change." );
+	}
+	else
+	{
+		SetFreakMap();
+		ModeOverride = true;
+		PrintToChatAll( "Freak Fortress has been enabled and will activate on the next map change." );
+	}
 }
 
 public void OnMapEnd()
 {
-	if ( ValidFreakMap() )
+	if ( ModeOverride )
+	{
+		ModeOverride = false;
+		return;
+	}
+
+	if ( IsFreakMap() )
 	{
 		SetFreakMap();
 	}
@@ -28,31 +52,23 @@ public void OnMapEnd()
 	{
 		int rand = GetRandomInt( 1, 10 );
 		if ( rand <= 10 )
-		{
 			SetFreakMap();
-		}
 		else
-		{
 			SetRandomMap();
-		}
 	}
 }
 
 public void OnClientPutInServer( int client )
 {
-	if ( ValidFreakMap() )
-	{
-		PrintToChat( client, "Freak Fortress is currently active. Switch to a non-arena map to resume normal gameplay." );
-		PrintToChat( client, "If you need the Freak Fortress content, see the #useful-links channel on our discord server: https://discord.gg/9RGdUS2" );
-	}
+	if ( IsFreakMap() )
+		PrintToChat( client, "Freak Fortress is currently active. If you need the content, see the #links channel on our Discord: https://discord.gg/9RGdUS2" );
 }
 
-static bool ValidFreakMap()
+static bool IsFreakMap()
 {
 	char buffer[64];
 	GetCurrentMap( buffer, sizeof( buffer ) );
-	
-	bool freakmap = StrContains( buffer, "arena", false ) == 0 || StrContains( buffer, "vsh", false ) == 0;
+	bool freakmap = StrContains( buffer, "arena", false ) >= 0 || StrContains( buffer, "vsh", false ) >= 0;
 	return freakmap;
 }
 
@@ -65,7 +81,7 @@ static void SetFreakMap()
 		"arena_watchtower", "arena_well", "vsh_shipment_v1a",
 		"vsh_scp_3008_final3", "vsh_distillery", "vsh_nucleus",
 		"vsh_skirmish", "vsh_tinyrock", "arena_perks", "vsh_maul",
-		"vsh_outburst"
+		"vsh_outburst", "arena_afterlife"
 	};
 	
 	int rand = GetRandomInt( 0, sizeof( MapList ) - 1 );
